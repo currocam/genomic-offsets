@@ -5,4 +5,11 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://currocam.github.io',
                 'git_url': 'https://github.com/currocam/genomic-offsets',
                 'lib_path': 'genomic_offsets'},
-  'syms': {'genomic_offsets.core': {'genomic_offsets.core.foo': ('core.html#foo', 'genomic_offsets/core.py')}}}
+  'syms': { 'genomic_offsets.RONA': { 'genomic_offsets.RONA.RONA': ('rona.html#rona', 'genomic_offsets/RONA.py'),
+                                      'genomic_offsets.RONA.RONA.__init__': ('rona.html#rona.__init__', 'genomic_offsets/RONA.py'),
+                                      'genomic_offsets.RONA.RONA.__str__': ('rona.html#rona.__str__', 'genomic_offsets/RONA.py'),
+                                      'genomic_offsets.RONA.RONA.fit': ('rona.html#rona.fit', 'genomic_offsets/RONA.py'),
+                                      'genomic_offsets.RONA.RONA.genomic_offset': ( 'rona.html#rona.genomic_offset',
+                                                                                    'genomic_offsets/RONA.py'),
+                                      'genomic_offsets.RONA.RONA.predict': ('rona.html#rona.predict', 'genomic_offsets/RONA.py')},
+            'genomic_offsets.core': {'genomic_offsets.core.foo': ('core.html#foo', 'genomic_offsets/core.py')}}}
