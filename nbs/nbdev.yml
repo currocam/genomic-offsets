@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "genomic-offsets"
+  site-url: "https://currocam.github.io/genomic-offsets"
+  description: "Implementation of popular genomic offset statistics"
+  repo-branch: main
+  repo-url: "https://github.com/currocam/genomic-offsets"
