@@ -7,7 +7,7 @@ __all__ = ['RONA']
 class RONA:
     "Risk of non-adaptedness genomic offset statistic."
     def __init__(self): 
-        self._reg = LinearRegression(copy_X=True, fit_intercept=True)
+        self._reg = None
     def __str__(self):
         return "RONA model."
     __repr__ = __str__
@@ -22,7 +22,9 @@ def fit(self:RONA,
     n2, P = X.shape
     if n1 != n2: 
         raise ValueError("Dimensions of array don't match")
-    self._reg.fit(X, Y)
+    X = sm.add_constant(X)
+    model = sm.OLS(Y, X)
+    self._reg = model.fit()
 
 # %% ../nbs/01_RONA.ipynb 13
 @patch
@@ -30,7 +32,7 @@ def predict(self:RONA,
         X: np.ndarray # Environmental matrix (nxP)
            )-> np.ndarray: # Predicted allele frequencies
     "Predicts the allele frequencies for a given environmental matrix. "    
-    return self._reg.predict(X)
+    return self._reg.predict(sm.add_constant(X))
 
 
 # %% ../nbs/01_RONA.ipynb 16
@@ -40,7 +42,8 @@ def genomic_offset(self:RONA,
         Xstar: np.ndarray, # Altered environmental matrix (nxP)
            )-> np.ndarray: # A vector of genomic offsets (n)
     "Predicts the allele frequencies for a given environmental matrix. "
-    L = model._reg.coef_.shape[0]
+    L = self._reg.params.shape[1]
+    X, Xstar = sm.add_constant(X), sm.add_constant(Xstar)
     if X.shape != Xstar.shape:
         raise ValueError("Dimensions of array don't match")
     return np.sum(np.abs(self._reg.predict(X) - self._reg.predict(Xstar)), axis=1) / L

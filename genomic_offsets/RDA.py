@@ -7,10 +7,11 @@ __all__ = ['RDA']
 class RDA:
     "Redundancy analysis genomic offset statistic."
     def __init__(self, K: int):
-        self._reg = LinearRegression(copy_X=True, fit_intercept=True)
-        self._pca = PCA(n_components=K)
+        self._reg = None
+        self._pca = None
+        self.K = K
     def __str__(self):
-        return "Redundancy analysis model"
+        return f"Redundancy analysis model with K={K}"
     __repr__ = __str__
 
 # %% ../nbs/02_RDA.ipynb 8
@@ -23,16 +24,19 @@ def fit(self:RDA,
     n2, P = X.shape
     if n1 != n2: 
         raise ValueError("Dimensions of array don't match")
-    self._reg.fit(X, Y)
-    self._pca.fit(self._reg.predict(X))
+    X = sm.add_constant(X)
+    model = sm.OLS(Y, X)
+    self._reg = model.fit()
+    self._pca = sm.PCA(self._reg.predict(X), ncomp=self.K, method="nipals")
 
 # %% ../nbs/02_RDA.ipynb 13
 @patch
 def predict(self:RDA,
         X: np.ndarray # Environmental matrix (nxP)
            )-> np.ndarray: # Predicted allele frequencies
-    "Predicts the allele frequencies for a given environmental matrix. "    
-    return self._pca.transform(self._reg.predict(X))
+    "Predicts the allele frequencies for a given environmental matrix."
+    X = sm.add_constant(X)
+    return np.dot(self._reg.predict(X), self._pca.loadings)
 
 # %% ../nbs/02_RDA.ipynb 16
 @patch
@@ -45,8 +49,8 @@ def genomic_offset(self:RDA,
         raise ValueError("Dimensions of array don't match")
     offset = np.zeros(X.shape[0])
     diff = self.predict(X) - self.predict(Xstar)
-    weights = self._pca.explained_variance_ / np.sum(self._pca.explained_variance_ )
-    L = model._reg.coef_.shape[0]
+    weights = self._pca.eigenvals / np.sum(self._pca.eigenvals)
+    L = self._reg.params.shape[1]
     for distance, w in zip(diff.T, weights):
         offset += distance**2*w/L
     return offset
