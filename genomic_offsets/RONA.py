@@ -7,13 +7,9 @@ __all__ = ['RONA']
 class RONA:
     "Risk of non-adaptedness genomic offset statistic."
     def __init__(self): 
-        self.B = None
+        self._reg = LinearRegression(copy_X=True, fit_intercept=True)
     def __str__(self):
-        if self.B is None: 
-            return "RONA model. Please, fit me first using the `fit()` method."
-        else: 
-            p, l = self.B.shape
-            return f"RONA model. Fitted with {p-1} environmental covariates and {l} alleles."
+        return "RONA model."
     __repr__ = __str__
 
 # %% ../nbs/01_RONA.ipynb 8
@@ -26,9 +22,7 @@ def fit(self:RONA,
     n2, P = X.shape
     if n1 != n2: 
         raise ValueError("Dimensions of array don't match")
-    X = np.hstack((np.ones((X.shape[0], 1)), X)) 
-    B = np.linalg.lstsq(X, Y)[0]
-    self.B = B
+    self._reg.fit(X, Y)
 
 # %% ../nbs/01_RONA.ipynb 13
 @patch
@@ -36,11 +30,8 @@ def predict(self:RONA,
         X: np.ndarray # Environmental matrix (nxP)
            )-> np.ndarray: # Predicted allele frequencies
     "Predicts the allele frequencies for a given environmental matrix. "    
-    B = self.B
-    if X.shape[1] != (B.shape[0]-1):
-        raise ValueError("Dimensions of array don't match")
-    X = np.hstack((np.ones((X.shape[0], 1)), X)) 
-    return X@B
+    return self._reg.predict(X)
+
 
 # %% ../nbs/01_RONA.ipynb 16
 @patch
@@ -48,10 +39,8 @@ def genomic_offset(self:RONA,
         X: np.ndarray, # Environmental matrix (nxP)
         Xstar: np.ndarray, # Altered environmental matrix (nxP)
            )-> np.ndarray: # A vector of genomic offsets (n)
-    "Predicts the allele frequencies for a given environmental matrix. "    
-    B = self.B
+    "Predicts the allele frequencies for a given environmental matrix. "
+    L = model._reg.coef_.shape[0]
     if X.shape != Xstar.shape:
         raise ValueError("Dimensions of array don't match")
-    X = np.hstack((np.ones((X.shape[0], 1)), X)) 
-    Xstar = np.hstack((np.ones((Xstar.shape[0], 1)), Xstar)) 
-    return np.sum(np.abs(X @ self.B - Xstar @ self.B), axis=1) / model.B.shape[1]
+    return np.sum(np.abs(self._reg.predict(X) - self._reg.predict(Xstar)), axis=1) / L
