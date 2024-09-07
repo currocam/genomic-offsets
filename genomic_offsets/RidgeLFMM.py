@@ -34,7 +34,7 @@ def fit(self:RidgeLFMM,
     self.U, self.V, self.B = lfmm2(Y, X, self.K, self.lambd)
 
 
-# %% ../nbs/03_LFMM.ipynb 20
+# %% ../nbs/03_LFMM.ipynb 21
 TracyWidomTest = namedtuple("TracyWidomTest", "statistics pvalues")
 def TracyWidom_from_eigenvalues(
         eigenvalues: np.ndarray # Array of eigenvalues
@@ -43,7 +43,7 @@ def TracyWidom_from_eigenvalues(
     pvalues = 1- TracyWidom(beta=1).cdf(twstat)
     return TracyWidomTest(twstat, pvalues)
 
-# %% ../nbs/03_LFMM.ipynb 24
+# %% ../nbs/03_LFMM.ipynb 26
 def search_latent_factors_with_TracyWidom(
         mat: np.ndarray, # Genotype matrix
         thresholds: np.ndarray # Array of significance levels
@@ -57,7 +57,7 @@ def search_latent_factors_with_TracyWidom(
             res[i] = indices[0] - 1
     return res
 
-# %% ../nbs/03_LFMM.ipynb 27
+# %% ../nbs/03_LFMM.ipynb 29
 @patch
 def FTest(self:RidgeLFMM,
         Y: np.ndarray, # Allele frequency matrix (nxL)
