@@ -43,7 +43,7 @@ def genomic_offset(self:RONA,
         X: np.ndarray, # Environmental matrix (nxP)
         Xstar: np.ndarray, # Altered environmental matrix (nxP)
            )-> np.ndarray: # A vector of genomic offsets (n)
-    "Predicts the allele frequencies for a given environmental matrix. "
+    "Calculates the genomic offset statistics. "
     L = self._reg.params.shape[1]
     X, Xstar = sm.add_constant(X), sm.add_constant(Xstar)
     if X.shape != Xstar.shape:

@@ -13,7 +13,7 @@ class RDA:
         self._pca = None
         self.K = K
     def __str__(self):
-        return f"Redundancy analysis model with K={K}"
+        return f"Redundancy analysis model with K={self.K}"
     __repr__ = __str__
 
 # %% ../nbs/02_RDA.ipynb 8
@@ -36,7 +36,7 @@ def fit(self:RDA,
 def predict(self:RDA,
         X: np.ndarray # Environmental matrix (nxP)
            )-> np.ndarray: # Predicted allele frequencies
-    "Predicts the allele frequencies for a given environmental matrix."
+    "Predicts the projected alleles for a given environmental matrix."
     X = sm.add_constant(X)
     return np.dot(self._reg.predict(X), self._pca.loadings)
 
@@ -46,7 +46,7 @@ def genomic_offset(self:RDA,
         X: np.ndarray, # Environmental matrix (nxP)
         Xstar: np.ndarray, # Altered environmental matrix (nxP)
            )-> np.ndarray: # A vector of genomic offsets (n)
-    "Predicts the allele frequencies for a given environmental matrix. " 
+    "Calculates the genomic offset statistic. " 
     if X.shape != Xstar.shape: 
         raise ValueError("Dimensions of array don't match")
     offset = np.zeros(X.shape[0])
