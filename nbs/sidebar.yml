@@ -1,6 +1,7 @@
 website:
   sidebar:
     contents:
+      - index.ipynb
       - 01_RONA.ipynb
       - 02_RDA.ipynb
       - 03_LFMM.ipynb
