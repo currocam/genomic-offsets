@@ -1,0 +1,102 @@
+[
+  {
+    "objectID": "gf.html",
+    "href": "gf.html",
+    "title": "GradientForest",
+    "section": "",
+    "text": "TODO: Add documentation\n\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport statsmodels.api as sm\nimport pandas as pd\n\n\nsource\n\nGradientForestGO\n\n GradientForestGO (ntrees:int)\n\nGradient forest genomic offset statistic.\n\n\n\n\nType\nDetails\n\n\n\n\nntrees\nint\nNumber of trees\n\n\n\n\nmodel = GradientForestGO(ntrees=100)\n\n\nsource\n\n\nGradientForestGO.fit\n\n GradientForestGO.fit (Y:numpy.ndarray, X:numpy.ndarray)\n\nFits the Geometric genomic offset model.\n\n\n\n\nType\nDetails\n\n\n\n\nY\nndarray\nAllele frequency matrix (nxL)\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\n\nThe fit() method expects as input an allele matrix \\(\\mathbf Y\\) and an environmental matrix \\(\\mathbf X\\) with as many rows as individuals. For now, let us simulate them under the ¿generative model?:\n\ndef generative_model(rng, N, L, P, n_targets):\n    X = rng.normal(size=N)\n    B = np.zeros(L)\n    target_indices = rng.choice(L, n_targets, replace=False)\n    B[target_indices] = rng.uniform(-10, 10, size=n_targets)\n    U = np.dot(X.reshape(-1, 1), np.array([[-1, 0.5, 1.5]])) + rng.normal(size=(N, 3))\n    V = rng.normal(size=(3, L))  # V should have 3 rows to match the columns of U\n    Y = np.dot(X.reshape(-1, 1), B.reshape(1, -1)) + np.dot(U, V) + rng.normal(scale=0.5, size=(N, L))\n    Y = (Y &gt; 0).astype(int)\n    X = np.hstack((X.reshape(-1, 1),  rng.normal(size=(N, P-1))))\n    assert X.shape == (N, P)\n    assert Y.shape == (N, L)\n    return Y, X\nrng = np.random.default_rng(1000)\nY, X = generative_model(rng, N=100, L=500, P=10, n_targets=10)\n\n\nindices = rng.permutation(100)\ntraining_idx, test_idx = indices[:60], indices[60:]\nXtrain, Xpredict = X[training_idx,:], X[test_idx,:]\nYtrain, Ypredict = Y[training_idx,:], Y[test_idx,:]\nmodel.fit(Ytrain, Xtrain)\n\nFinally, we can predict the genomic offset under two different environments:\n\nsource\n\n\nGradientForestGO.genomic_offset\n\n GradientForestGO.genomic_offset (X:numpy.ndarray, Xstar:numpy.ndarray)\n\nCalculates the genomic offset statistic.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nXstar\nndarray\nAltered environmental matrix (nxP)\n\n\nReturns\nndarray\nA vector of genomic offsets (n)\n\n\n\nAs expected, the genomic offset is zero if both environmental matrixes are identical:\n\noffset = model.genomic_offset(Xpredict, Xpredict)\noffset\n\narray([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0.])\n\n\n\noffset = model.genomic_offset(Xpredict, Xpredict+rng.normal(size=Xpredict.shape))\noffset\n\narray([0.18361645, 0.01388196, 0.22667139, 0.02739474, 0.00115051,\n       0.01398597, 0.00802268, 0.23722511, 0.23463455, 0.00888398,\n       0.22688352, 0.18607784, 0.00972496, 0.01553172, 0.20280644,\n       0.00247204, 0.01598696, 0.00304033, 0.02735806, 0.17776314,\n       0.20591512, 0.20492466, 0.05035983, 0.00234885, 0.00073507,\n       0.00538123, 0.01542525, 0.00179949, 0.13238307, 0.23063683,\n       0.00592212, 0.01576689, 0.01079999, 0.06972746, 0.04657568,\n       0.12715696, 0.01519687, 0.00209921, 0.00314659, 0.0063228 ])",
+    "crumbs": [
+      "GradientForest"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "genomic-offsets",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation.",
+    "crumbs": [
+      "genomic-offsets"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "genomic-offsets",
+    "section": "Install",
+    "text": "Install\npip install genomic_offsets",
+    "crumbs": [
+      "genomic-offsets"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "genomic-offsets",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:",
+    "crumbs": [
+      "genomic-offsets"
+    ]
+  },
+  {
+    "objectID": "geometric.html",
+    "href": "geometric.html",
+    "title": "Geometric GO",
+    "section": "",
+    "text": "The geometric genomic offset.\nTODO!\n\nimport numpy as np\nimport statsmodels.api as sm\nimport matplotlib.pyplot as plt\n\n\nsource\n\nGeometricGO\n\n GeometricGO (K:int, lambd:float)\n\nGeometric genomic offset statistic.\n\n\n\n\nType\nDetails\n\n\n\n\nK\nint\nNumber of latent factors\n\n\nlambd\nfloat\nRegularization parameter\n\n\n\nIn order to use the model we have first to initialize it with the number of latent factors \\(K\\) and a certain regularization parameter \\(\\lambda\\).\n\nmodel = GeometricGO(K=1, lambd=1e-5)\n\nThen, we have to fit the model …\n\nsource\n\n\nGeometricGO.fit\n\n GeometricGO.fit (Y:numpy.ndarray, X:numpy.ndarray)\n\nFits the Geometric genomic offset model.\n\n\n\n\nType\nDetails\n\n\n\n\nY\nndarray\nAllele frequency matrix (nxL)\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\n\nThe fit() method expects as input an allele matrix \\(\\mathbf Y\\) and an environmental matrix \\(\\mathbf X\\) with as many rows as individuals. For now, let us simulate them under the ¿generative model?:\n\ndef generative_model(rng, N, L, P, n_targets):\n    X = rng.normal(size=N)\n    B = np.zeros(L)\n    target_indices = rng.choice(L, n_targets, replace=False)\n    B[target_indices] = rng.uniform(-10, 10, size=n_targets)\n    U = np.dot(X.reshape(-1, 1), np.array([[-1, 0.5, 1.5]])) + rng.normal(size=(N, 3))\n    V = rng.normal(size=(3, L))  # V should have 3 rows to match the columns of U\n    Y = np.dot(X.reshape(-1, 1), B.reshape(1, -1)) + np.dot(U, V) + rng.normal(scale=0.5, size=(N, L))\n    Y = (Y &gt; 0).astype(int)\n    X = np.hstack((X.reshape(-1, 1),  rng.normal(size=(N, P-1))))\n    assert X.shape == (N, P)\n    assert Y.shape == (N, L)\n    return Y, X\nrng = np.random.default_rng(1000)\nY, X = generative_model(rng, N=100, L=500, P=10, n_targets=10)\n\n\nindices = rng.permutation(100)\ntraining_idx, test_idx = indices[:60], indices[60:]\nXtrain, Xpredict = X[training_idx,:], X[test_idx,:]\nYtrain, Ypredict = Y[training_idx,:], Y[test_idx,:]\nmodel.fit(Ytrain, Xtrain)\n\nFinally, we can predict the genomic offset under two different environments:\n\nsource\n\n\nGeometricGO.genomic_offset\n\n GeometricGO.genomic_offset (X:numpy.ndarray, Xstar:numpy.ndarray)\n\nCalculates the genomic offset statistic.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nXstar\nndarray\nAltered environmental matrix (nxP)\n\n\nReturns\nndarray\nA vector of genomic offsets (n)\n\n\n\nAs expected, the genomic offset is zero if both environmental matrixes are identical:\n\nmodel.genomic_offset(Xpredict, Xpredict)\n\narray([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0.])\n\n\n\noffset = model.genomic_offset(Xpredict, Xpredict+rng.normal(size=Xpredict.shape))\noffset\n\narray([0.45521477, 0.09006635, 0.17185525, 0.11570215, 0.00896073,\n       0.04192136, 0.0292939 , 0.26143774, 0.24471996, 0.0064966 ,\n       0.22319557, 0.04904645, 0.17064012, 0.09292498, 0.23717266,\n       0.120408  , 0.02731037, 0.08126873, 0.04341562, 0.06502931,\n       0.11710134, 0.11759253, 0.02034091, 0.03001484, 0.00405735,\n       0.01403853, 0.03992977, 0.05160579, 0.06869659, 0.36102953,\n       0.11020969, 0.01519932, 0.01971894, 0.03587198, 0.02604959,\n       0.06261495, 0.0313995 , 0.06330403, 0.01603789, 0.02613388])",
+    "crumbs": [
+      "Geometric GO"
+    ]
+  },
+  {
+    "objectID": "rona.html",
+    "href": "rona.html",
+    "title": "RONA",
+    "section": "",
+    "text": "The Risk of non-adaptedness (RONA) was first developed by Rellstab et al. (2016).\nTODO!\n\nsource\n\nRONA\n\n RONA ()\n\nRisk of non-adaptedness genomic offset statistic.\nIn order to use the model we have first to initialize it.\n\nmodel = RONA()\n\nThen, we have to fit the model (that is, find the the least squares solutions) to\n\\[\n\\mathbf y \\approx \\mathbf x \\mathbf b + \\mathbf w\n\\]\nwhere \\(\\mathbf y = [y_1, \\dots, y_L], y_l \\in \\mathbb [0, 1]\\) is a vector with the encoded allele frequencies and \\(\\mathbf x = [x_1, \\dots, x_P], x_p \\in \\mathbb R\\) is a vector with the environmental covariates. TODO: add details.\n\nsource\n\n\nRONA.fit\n\n RONA.fit (Y:numpy.ndarray, X:numpy.ndarray)\n\nFits the RONA model.\n\n\n\n\nType\nDetails\n\n\n\n\nY\nndarray\nAllele frequency matrix (nxL)\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\n\nThe fit() method expects as input an allele matrix \\(\\mathbf Y\\) and an environmental matrix \\(\\mathbf X\\) with as many rows as individuals. For now, let us simulate them under the ¿generative model?:\n\nN, L, P = 100, 10_000, 3_000\nrng = np.random.default_rng(1000)\nX = rng.normal(loc=0.0, scale=1.0, size=(N, P))\np = rng.uniform(low=0, high=1, size = (1, L))\nB = rng.normal(loc=0.0, scale=0.1, size = (P, L))\nY = X@B + np.ones((N, 1))@p\nY = Y.clip(0, 1)\nassert X.shape == (N, P)\nassert Y.shape == (N, L)\n\n\nindices = rng.permutation(N)\ntraining_idx, test_idx = indices[:60], indices[60:]\nXtrain, Xpredict = X[training_idx,:], X[test_idx,:]\nYtrain, Ypredict = Y[training_idx,:], Y[test_idx,:]\nmodel.fit(Ytrain, Xtrain)\n\nNow, we can make predictions:\n\nsource\n\n\nRONA.predict\n\n RONA.predict (X:numpy.ndarray)\n\nPredicts the allele frequencies for a given environmental matrix.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nReturns\nndarray\nPredicted allele frequencies\n\n\n\n\nmse = np.square(model.predict(Xpredict) - Ypredict).mean()\nmse\n\nnp.float64(0.4798474478330509)\n\n\nFinally, we can predict the genomic offset under two different environments:\n\nsource\n\n\nRONA.genomic_offset\n\n RONA.genomic_offset (X:numpy.ndarray, Xstar:numpy.ndarray)\n\nCalculates the genomic offset statistics.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nXstar\nndarray\nAltered environmental matrix (nxP)\n\n\nReturns\nndarray\nA vector of genomic offsets (n)\n\n\n\nAs expected, the genomic offset is zero if both environmental matrixes are identical:\n\nmodel.genomic_offset(Xpredict, Xpredict)\n\narray([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0.])\n\n\n\noffset = model.genomic_offset(Xpredict, Xpredict+rng.normal(size=Xpredict.shape))\noffset\n\narray([0.05646954, 0.08570952, 0.07075075, 0.05351216, 0.0726241 ,\n       0.05323791, 0.07183538, 0.07132533, 0.05493233, 0.07335116,\n       0.05544835, 0.17082009, 0.06566841, 0.11615458, 0.08035487,\n       0.06608256, 0.07271105, 0.04740223, 0.05988167, 0.07648408,\n       0.05618113, 0.05951376, 0.09519423, 0.16149034, 0.05609172,\n       0.10181409, 0.05472664, 0.06829445, 0.07959549, 0.04930817,\n       0.06706859, 0.05916575, 0.04900105, 0.06582103, 0.19840874,\n       0.14043688, 0.06313783, 0.12686495, 0.11833902, 0.06902067])\n\n\n\n\n\n\n\nReferences\n\nRellstab, Christian, Stefan Zoller, Lorenz Walthert, Isabelle Lesur, Andrea R. Pluess, René Graf, Catherine Bodénès, Christoph Sperisen, Antoine Kremer, and Felix Gugerli. 2016. “Signatures of Local Adaptation in Candidate Genes of Oaks (Quercus Spp.) with Respect to Present and Future Climatic Conditions.” Molecular Ecology 25 (23): 5907–24. https://doi.org/10.1111/mec.13889.",
+    "crumbs": [
+      "RONA"
+    ]
+  },
+  {
+    "objectID": "rda.html",
+    "href": "rda.html",
+    "title": "RDA GO",
+    "section": "",
+    "text": "The genomic offset based on Redundancy analysis as done in Capblancq and Forester (2021).\nTODO!\n\nsource\n\nRDA\n\n RDA (K:int)\n\nRedundancy analysis genomic offset statistic.\nIn order to use the model we have first to initialize it with a maximum number of canonical axes K.\n\nK = 2\nmodel = RDA(K)\n\nThen, we have to fit the model …\n\nsource\n\n\nRDA.fit\n\n RDA.fit (Y:numpy.ndarray, X:numpy.ndarray)\n\nFits the RDA model.\n\n\n\n\nType\nDetails\n\n\n\n\nY\nndarray\nAllele frequency matrix (nxL)\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\n\nThe fit() method expects as input an allele matrix \\(\\mathbf Y\\) and an environmental matrix \\(\\mathbf X\\) with as many rows as individuals. For now, let us simulate them under the ¿generative model?:\n\nN, L, P = 100, 10_000, 30\nrng = np.random.default_rng(1000)\nX = rng.normal(loc=0.0, scale=1.0, size=(N, P))\np = rng.uniform(low=0, high=1, size = (1, L))\nB = rng.normal(loc=0.0, scale=0.1, size = (P, L))\nY = X@B + np.ones((N, 1))@p\nY = Y.clip(0, 1)\nassert X.shape == (N, P)\nassert Y.shape == (N, L)\n\n\nindices = rng.permutation(N)\ntraining_idx, test_idx = indices[:60], indices[60:]\nXtrain, Xpredict = X[training_idx,:], X[test_idx,:]\nYtrain, Ypredict = Y[training_idx,:], Y[test_idx,:]\nmodel.fit(Ytrain, Xtrain)\n\nNow, we can make predictions:\n\nsource\n\n\nRDA.predict\n\n RDA.predict (X:numpy.ndarray)\n\nPredicts the projected alleles for a given environmental matrix.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nReturns\nndarray\nPredicted allele frequencies\n\n\n\n\nproj = model.predict(Xpredict)\nfig, ax = plt.subplots()\nscatter = ax.scatter(proj[:, 0], proj[:, 1], c='blue', edgecolor='k', alpha=0.7, s=50)\nax.set_xlabel('Canonical axis 1', fontsize=12)\nax.set_ylabel('Canonical axis 2', fontsize=12)\nax.grid(True, linestyle='--', alpha=0.6)\nplt.show()\n\n\n\n\n\n\n\n\nFinally, we can predict the genomic offset under two different environments:\n\nsource\n\n\nRDA.genomic_offset\n\n RDA.genomic_offset (X:numpy.ndarray, Xstar:numpy.ndarray)\n\nCalculates the genomic offset statistic.\n\n\n\n\nType\nDetails\n\n\n\n\nX\nndarray\nEnvironmental matrix (nxP)\n\n\nXstar\nndarray\nAltered environmental matrix (nxP)\n\n\nReturns\nndarray\nA vector of genomic offsets (n)\n\n\n\nAs expected, the genomic offset is zero if both environmental matrixes are identical:\n\nmodel.genomic_offset(Xpredict, Xpredict)\n\narray([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0.])\n\n\n\noffset = model.genomic_offset(Xpredict, Xpredict+rng.normal(size=Xpredict.shape))\noffset\n\narray([4.92357911e-03, 3.32915955e-03, 2.08255362e-03, 6.85551726e-04,\n       1.69879388e-03, 1.29574627e-02, 5.25032017e-04, 3.81877626e-03,\n       2.19073321e-03, 4.94097972e-03, 1.35313392e-03, 5.11396626e-03,\n       5.58329793e-03, 3.41665386e-03, 8.23240168e-03, 5.91416640e-04,\n       2.81347588e-03, 3.74435644e-03, 5.03381998e-04, 1.06139414e-02,\n       1.30278264e-02, 2.26649053e-03, 2.99553206e-03, 1.63758928e-05,\n       2.45834552e-03, 1.79033776e-04, 4.45603830e-04, 1.53036609e-04,\n       2.67947979e-03, 1.11264680e-02, 3.29556971e-03, 1.11013314e-02,\n       4.47265660e-03, 6.10795441e-03, 1.25497111e-03, 8.70051040e-03,\n       1.67001336e-02, 6.44847731e-03, 4.17171529e-03, 3.17151162e-04])\n\n\n\n\n\n\n\nReferences\n\nCapblancq, Thibaut, and Brenna R. Forester. 2021. “Redundancy Analysis: A Swiss Army Knife for Landscape Genomics.” Methods in Ecology and Evolution 12 (12): 2298–2309. https://doi.org/10.1111/2041-210x.13722.",
+    "crumbs": [
+      "RDA GO"
+    ]
+  },
+  {
+    "objectID": "lfmm.html",
+    "href": "lfmm.html",
+    "title": "RidgeLFMM",
+    "section": "",
+    "text": "Ridge solutions to a Latent factor mixed model as developed by Caye et al. (2019).\nTODO: Add documentation\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport statsmodels.api as sm\nsource",
+    "crumbs": [
+      "RidgeLFMM"
+    ]
+  },
+  {
+    "objectID": "lfmm.html#tracy-widom-test",
+    "href": "lfmm.html#tracy-widom-test",
+    "title": "RidgeLFMM",
+    "section": "Tracy-Widom test",
+    "text": "Tracy-Widom test\nThe Tracy-Widom statistics can be computed from eigenvalues of the genotype matrix. Assuming we have already run PCA:\n\ntw = TracyWidom_statistic(pca.eigenvals)\ntw\n\narray([ 2.77705718,  3.75974611,  8.61227923, 10.04178075,  8.99228271,\n       11.35023082, 10.52348525,  4.02039346,  3.23765541,  1.2409211 ,\n        1.04161821,  2.13879148, -0.51434203,  0.34619778,  0.31436582,\n        0.05180913, -1.7429673 , -1.72091196, -1.57085881, -0.90878066,\n       -2.19740509, -1.37618545, -1.33952488, -1.16909122, -1.43430713,\n       -0.89103181, -1.52716887, -1.99080084, -1.93656521, -1.80524369,\n       -1.5159909 , -0.78553427, -2.19314044, -2.5419654 , -1.6276135 ,\n       -0.98867776, -1.11233303, -0.35534093, -0.52820144, -0.39299708,\n       -0.65812177, -0.81964231, -1.21624522, -1.49336892, -0.98588646,\n       -1.00924749, -1.26902281, -0.78655709, -0.92656526,         nan])\n\n\nA p-value can be then calculated to each eigenvalue from the TracyWidom distribution (with \\(\\beta=1\\)). The number of significant latent factors (for a given significance threshold) can be then found by first finding the first non-significant eigenvalue, \\(d\\). Then, we will assign \\(K=d-1\\). We provide a convenient function to do so:\n\nsource\n\nlatent_factors_with_TracyWidom\n\n latent_factors_with_TracyWidom (twstat:numpy.ndarray,\n                                 thresholds:numpy.ndarray)\n\n\n\n\n\nType\nDetails\n\n\n\n\ntwstat\nndarray\nTracy-Widom statistics\n\n\nthresholds\nndarray\nArray of significance levels\n\n\nReturns\nint\nNumber of significant eigenvalues\n\n\n\n\nlatent_factors_with_TracyWidom(tw, [0.0, 0.001, 0.005, 0.01, 0.05, 1.0])\n\narray([ 0.,  0.,  8.,  8., 11., 50.])",
+    "crumbs": [
+      "RidgeLFMM"
+    ]
+  },
+  {
+    "objectID": "lfmm.html#gea-candidates",
+    "href": "lfmm.html#gea-candidates",
+    "title": "RidgeLFMM",
+    "section": "GEA candidates",
+    "text": "GEA candidates\nWe can use F-test based on the LFMM model to find GEA candidates:\n\nsource\n\nRidgeLFMM.FTest\n\n RidgeLFMM.FTest (Y:numpy.ndarray, X:numpy.ndarray,\n                  genomic_control:bool=True)\n\nRe-fit the coefficient of the LFMM model and make an F-test.\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nY\nndarray\n\nAllele frequency matrix (nxL)\n\n\nX\nndarray\n\nEnvironmental matrix (nxP)\n\n\ngenomic_control\nbool\nTrue\nwhether to use genomic control\n\n\nReturns\nndarray\n\nArray of p-values (L)\n\n\n\n\nfig, ax = plt.subplots()\nFscores, pvalues = model.FTest(Y, X)\nax.hist(pvalues, 100, color='blue', alpha=0.7)\nplt.show()\n\n\n\n\n\n\n\nFigure 2: Distribution of p-values (after applying genomic control)",
+    "crumbs": [
+      "RidgeLFMM"
+    ]
+  }
+]
