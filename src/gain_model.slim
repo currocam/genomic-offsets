@@ -1,0 +1,156 @@
+// This script is based on https://github.com/kr-colab/spatial_sims_standard
+initialize() {
+	initializeSLiMModelType("nonWF");
+	initializeSLiMOptions(dimensionality="xy");
+	initializeTreeSeq();
+	defineConstant("INITFILE", "init.trees");
+	defineConstant("OUTFILE", "out.trees");
+	
+	// Constant parameters
+	defineConstant("LIFETIME", 1); // average life span
+	defineConstant("SZ", 0.1); // sigma_Z, dispersal fitness Gaussian
+	defineConstant("H2", 0.8); // h2, heritability
+	defineConstant("SD", 0.3); // sigma_D, dispersal distance
+	defineConstant("SX", 0.3); // sigma_X, interaction distance for measuring
+	defineConstant("SM", 0.3); // sigma_M, mate choice distance
+	defineConstant("K", 10); // carrying capacity per unit area
+	defineConstant("WIDTH", 10.0); // width of the simulated area
+	defineConstant("HEIGHT", 10.0); // height of the simulated area
+	defineConstant("RUNTIME", 5000); // Number of ticks
+	defineConstant("L", 1e8); // genome length
+	defineConstant("R", 1e-8); // recombination rate	
+	// Derived parameters
+	defineConstant("FECUN", 1 / LIFETIME);
+	defineConstant("RHO", FECUN / ((1 + FECUN) * K));
+	
+	// basic genetics
+	initializeMutationRate(0.0);
+	initializeMutationType("m1", 0.5, "f", 0.0); // neutral
+	initializeMutationType("m2", 0.5, "f", 0.0); // QTLs
+	m2.convertToSubstitution = F;
+	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElement(g1, 0, L-1);
+	initializeRecombinationRate(R);
+	
+	// spatial interaction for local density measurement
+	initializeInteractionType(1, "xy", reciprocal=T, maxDistance=3 * SX);
+	i1.setInteractionFunction("n", 1, SX);
+	
+	// spatial interaction for mate choice
+	initializeInteractionType(2, "xy", reciprocal=T, maxDistance=3 * SM);
+	i2.setInteractionFunction("n", 1, SM);
+
+}
+
+// We want to handle the impact of QTLs in fitness ourselves
+mutationEffect(m2) { return 1.0; }
+
+// Initialize the simulation
+1 late() { initialize(); }
+
+// preparation for the reproduction() callback
+2: first() { i2.evaluate(p0); }
+
+reproduction() {
+	mate = i2.drawByStrength(individual, 1);
+	if (mate.size())
+		subpop.addCrossed(individual, mate, count=rpois(1, FECUN));
+}
+
+2: early() {
+	// Disperse offspring
+	offspring = p0.subsetIndividuals(maxAge=0);
+	// Simulate phenotypes and record them
+	offspring.tagF = simulatePhenotypes(offspring, m2);
+	
+	p0.deviatePositions(offspring, "reprising", INF, "n", SD);
+	// Measure local density and use it for density regulation
+	i1.evaluate(p0);
+	inds = p0.individuals;
+	competition = i1.localPopulationDensity(inds);
+	inds.fitnessScaling = 1 / (1 + RHO * competition);
+	phenotype = inds.tagF;
+	env = p0.spatialMapValue(ENV,inds.spatialPosition);
+	w = relativeFitness(inds.tagF, env);
+	inds.fitnessScaling = inds.fitnessScaling * w;
+	if ((sim.cycle-2) % 500 == 0)
+		catn(sim.cycle-2+"\t"+mean((phenotype-optimumUnderEnv(env))^2));
+}
+
+late() {
+	// Error handling
+	if (p0.individualCount == 0) {
+		catn("Population went extinct! Ending the simulation.");
+		sim.simulationFinished();
+	}
+}
+
+RUNTIME late() {
+	catn("End of simulation (run time reached)");
+	saveResults();
+}
+
+// Initialize the simulation
+function (void) initialize(void) {
+	sim.readFromPopulationFile(INITFILE);
+	inds = p0.individuals;
+	p0.setSpatialBounds(c(0, 0, WIDTH, HEIGHT));
+	// Record positions & phenotypes
+	positions = p0.pointUniform(p0.individualCount);
+	inds.setSpatialPosition(positions);
+	// Simulate heterogenous landscape
+	mapValues = matrix(runif(25, -4, 4), ncol=5);
+	map1 = p0.defineSpatialMap("map1", "xy", mapValues, interpolate=T);
+	defineConstant("ENV", map1);
+	// Simulate heterogenous landscape *after*
+	mapValues2 =mapValues * runif(length(mapValues), -1, 1);
+	map2 = p0.defineSpatialMap("map2", "xy", mapValues2, interpolate=T);
+	defineConstant("ENV_ALTERED", map2);
+	
+	// Simulate phenotypes and record them
+	inds.tagF = simulatePhenotypes(inds, m2);
+	// Print header for logging purposes
+	catn("Tick\tMeanSquaredDistance");
+}
+
+function (void) saveResults(void) {
+	inds = p0.individuals;
+	params = Dictionary(
+		"x", inds.x,
+		"y", inds.y,
+		"PHENOTYPE", inds.tagF,
+		"ENV", p0.spatialMapValue(ENV,inds.spatialPosition),
+		"ENV_ALTERED", p0.spatialMapValue(ENV_ALTERED,inds.spatialPosition)
+		);
+	params.setValue(
+		"FITNESS", relativeFitness(
+		params.getValue("PHENOTYPE"),
+		params.getValue("ENV")
+		)
+		);
+	params.setValue(
+		"FITNESS_ALTERED", relativeFitness(
+		params.getValue("PHENOTYPE"),
+		params.getValue("ENV_ALTERED")
+		)
+		);
+	
+	sim.treeSeqOutput(OUTFILE, metadata=params);
+	sim.simulationFinished();
+
+}
+
+function (numeric)optimumUnderEnv(numeric env) {
+	// For simplicity, identity function!
+	return env;
+}
+
+function (numeric)relativeFitness(numeric pheno, numeric env) {
+	return dnorm(pheno, optimumUnderEnv(env), SZ);
+}
+
+function (numeric)simulatePhenotypes(object<Individual> individuals, object<MutationType> mutation) {
+	geneticValue = individuals.sumOfMutationsOfType(mutation);
+	sigma = sqrt(var(geneticValue) * (1-H2)/H2);
+	return geneticValue + rnorm(length(geneticValue), sd=sigma);
+}

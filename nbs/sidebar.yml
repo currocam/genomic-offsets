@@ -2,8 +2,9 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 01_RONA.ipynb
-      - 02_RDA.ipynb
-      - 03_geometric.ipynb
-      - 04_LFMM.ipynb
+      - 01_simulation.ipynb
+      - 02_RONA.ipynb
+      - 03_RDA.ipynb
+      - 04_geometric.ipynb
       - 05_gf.ipynb
+      - 06_LFMM.ipynb
