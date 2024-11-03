@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['RONA']
 
-# %% ../nbs/02_RONA.ipynb 4
+# %% ../nbs/02_RONA.ipynb 5
 class RONA:
     "Risk of non-adaptedness genomic offset statistic."
     def __init__(self): 
@@ -14,7 +14,7 @@ class RONA:
         return "RONA model."
     __repr__ = __str__
 
-# %% ../nbs/02_RONA.ipynb 8
+# %% ../nbs/02_RONA.ipynb 9
 @patch
 def fit(self:RONA,
         Y: np.ndarray, # Allele frequency matrix (nxL)
@@ -28,7 +28,7 @@ def fit(self:RONA,
     model = sm.OLS(Y, X)
     self._reg = model.fit()
 
-# %% ../nbs/02_RONA.ipynb 13
+# %% ../nbs/02_RONA.ipynb 17
 @patch
 def predict(self:RONA,
         X: np.ndarray # Environmental matrix (nxP)
@@ -37,7 +37,7 @@ def predict(self:RONA,
     return self._reg.predict(sm.add_constant(X))
 
 
-# %% ../nbs/02_RONA.ipynb 16
+# %% ../nbs/02_RONA.ipynb 21
 @patch
 def genomic_offset(self:RONA,
         X: np.ndarray, # Environmental matrix (nxP)

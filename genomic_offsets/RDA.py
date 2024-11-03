@@ -5,7 +5,7 @@
 # %% auto 0
 __all__ = ['RDA']
 
-# %% ../nbs/03_RDA.ipynb 4
+# %% ../nbs/03_RDA.ipynb 5
 class RDA:
     "Redundancy analysis genomic offset statistic."
     def __init__(self, K: int):
@@ -16,7 +16,7 @@ class RDA:
         return f"Redundancy analysis model with K={self.K}"
     __repr__ = __str__
 
-# %% ../nbs/03_RDA.ipynb 8
+# %% ../nbs/03_RDA.ipynb 9
 @patch
 def fit(self:RDA,
         Y: np.ndarray, # Allele frequency matrix (nxL)
@@ -31,7 +31,7 @@ def fit(self:RDA,
     self._reg = model.fit()
     self._pca = sm.PCA(self._reg.predict(X), ncomp=self.K, method="nipals")
 
-# %% ../nbs/03_RDA.ipynb 13
+# %% ../nbs/03_RDA.ipynb 19
 @patch
 def predict(self:RDA,
         X: np.ndarray # Environmental matrix (nxP)
@@ -40,7 +40,7 @@ def predict(self:RDA,
     X = sm.add_constant(X)
     return np.dot(self._reg.predict(X), self._pca.loadings)
 
-# %% ../nbs/03_RDA.ipynb 16
+# %% ../nbs/03_RDA.ipynb 24
 @patch
 def genomic_offset(self:RDA,
         X: np.ndarray, # Environmental matrix (nxP)
