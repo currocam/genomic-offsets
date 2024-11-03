@@ -28,7 +28,7 @@ def fit(self:RONA,
     model = sm.OLS(Y, X)
     self._reg = model.fit()
 
-# %% ../nbs/02_RONA.ipynb 17
+# %% ../nbs/02_RONA.ipynb 18
 @patch
 def predict(self:RONA,
         X: np.ndarray # Environmental matrix (nxP)
@@ -37,7 +37,7 @@ def predict(self:RONA,
     return self._reg.predict(sm.add_constant(X))
 
 
-# %% ../nbs/02_RONA.ipynb 21
+# %% ../nbs/02_RONA.ipynb 22
 @patch
 def genomic_offset(self:RONA,
         X: np.ndarray, # Environmental matrix (nxP)

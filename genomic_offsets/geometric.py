@@ -23,6 +23,7 @@ class GeometricGO:
                  lambd: float): # Regularization parameter
         self.K = K
         self.lambd = lambd
+        self._LFMM = None
         self._mx = None
         self._sx = None
         self.Cb = None
@@ -33,7 +34,7 @@ class GeometricGO:
 # %% ../nbs/04_geometric.ipynb 9
 @patch
 def fit(self:GeometricGO,
-        Y: np.ndarray, # Allele frequency matrix (nxL)
+        Y: np.ndarray, # Genotype matrix (nxL)
         X: np.ndarray): # Environmental matrix (nxP)
     "Fits the Geometric genomic offset model. "
     n1, L = Y.shape
@@ -48,11 +49,11 @@ def fit(self:GeometricGO,
     X = X / sx
     self._mx = mx
     self._sx = sx
-    model = RidgeLFMM(K=self.K, lambd=self.lambd)
+    model = self._LFMM = RidgeLFMM(K=self.K, lambd=self.lambd)
     model.fit(Y=Y, X=X)
     self.Cb = np.dot(model.B.T, model.B) / model.B.shape[0]
 
-# %% ../nbs/04_geometric.ipynb 14
+# %% ../nbs/04_geometric.ipynb 19
 @patch
 def _rescale_env(self:GeometricGO,
         X: np.ndarray, # Environmental matrix (nxP)
@@ -61,6 +62,16 @@ def _rescale_env(self:GeometricGO,
         raise ValueError("You have to fit the model first!")
     return (X-self._mx) / self._sx 
 
+# %% ../nbs/04_geometric.ipynb 20
+@patch
+def predict(self:GeometricGO,
+        X: np.ndarray # Environmental matrix (nxP)
+           )-> np.ndarray: # Predicted allele frequencies
+    "Predicts the *centered* optimal genotypes for the fitted environmental matrix."
+    X = self._rescale_env(X)
+    return self._LFMM.predict(X)
+
+# %% ../nbs/04_geometric.ipynb 24
 @njit
 def genetic_gap(Cb: np.ndarray, X: np.ndarray, Xstar: np.ndarray) -> np.ndarray:
     offsets = np.zeros(X.shape[0])
@@ -69,7 +80,7 @@ def genetic_gap(Cb: np.ndarray, X: np.ndarray, Xstar: np.ndarray) -> np.ndarray:
         offsets[i] = np.dot(np.dot(diff, Cb), diff.T)
     return offsets
 
-# %% ../nbs/04_geometric.ipynb 15
+# %% ../nbs/04_geometric.ipynb 25
 @patch
 def genomic_offset(self:GeometricGO,
         X: np.ndarray, # Environmental matrix (nxP)

@@ -65,7 +65,7 @@ def lfmm2(Y, X, K, lambd=1e-5, center=True):
 def fit(self:RidgeLFMM,
         Y: np.ndarray, # Allele frequency matrix (nxL)
         X: np.ndarray): # Environmental matrix (nxP)
-    "Fits the LFMM model. "
+    "Fits the LFMM model. It a"
     n1, L = Y.shape
     n2, P = X.shape
     if n1 != n2: 
@@ -75,7 +75,15 @@ def fit(self:RidgeLFMM,
     self.U, self.V, self.B = lfmm2(Y, X, self.K, self.lambd)
 
 
-# %% ../nbs/06_LFMM.ipynb 24
+# %% ../nbs/06_LFMM.ipynb 18
+@patch
+def predict(self:RidgeLFMM,
+        X: np.ndarray): # Environmental matrix (nxP)
+    "Predicts the centered genotypes for a given environmental matrix."
+    X = X - np.mean(X, axis=0)
+    return X @ self.B.T + self.U@self.V.T
+
+# %% ../nbs/06_LFMM.ipynb 27
 def latent_factors_with_TracyWidom(
         twstat: np.ndarray, # Tracy-Widom statistics
         thresholds: np.ndarray # Array of significance levels
@@ -92,7 +100,7 @@ def latent_factors_with_TracyWidom(
             res[i] = max(indices[0] - 1, 0)
     return res
 
-# %% ../nbs/06_LFMM.ipynb 28
+# %% ../nbs/06_LFMM.ipynb 31
 @patch
 def FTest(self:RidgeLFMM,
         Y: np.ndarray, # Allele frequency matrix (nxL)
