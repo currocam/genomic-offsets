@@ -11,3 +11,6 @@ are obtained from Genotype environment associations (GEA). This package
 efficiently implements the four most popular metrics: RONA, RDA GO,
 Gradient Forest GO, and Geometric GO, as well as opinionated simulation
 templates (built on top of SLiM and msprime).
+
+You can find more information in the [documentation web
+page](https://currocam.github.io/genomic-offsets/).
