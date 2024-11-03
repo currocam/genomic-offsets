@@ -24,7 +24,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# %% ../nbs/05_gf.ipynb 5
+# %% ../nbs/05_gf.ipynb 6
 class GradientForestGO:
     "Gradient forest genomic offset statistic."
     def __init__(self, 
@@ -47,7 +47,7 @@ class GradientForestGO:
         return f"Gradient Forest genomic offset with {self.ntrees} trees."
     __repr__ = __str__
 
-# %% ../nbs/05_gf.ipynb 7
+# %% ../nbs/05_gf.ipynb 10
 @patch
 def fit(self:GradientForestGO,
         Y: np.ndarray, # Allele frequency matrix (nxL)
@@ -75,7 +75,17 @@ def fit(self:GradientForestGO,
             dist = (np.array(dist[0]), np.array(dist[1]))
             self.F.append(dist)
 
-# %% ../nbs/05_gf.ipynb 13
+# %% ../nbs/05_gf.ipynb 20
+@patch
+def importance_turnover(self:GradientForestGO,
+        x: np.ndarray, # Values of interest to interpolate
+        feature_idx: int, # Environmental covariate index
+        )-> np.ndarray: # Interpolated importance turnover
+    if self.F is None: 
+        raise ValueError("You have to fit the model first!")
+    return np.interp(x, self.F[feature_idx][0], self.F[feature_idx][1])
+
+# %% ../nbs/05_gf.ipynb 25
 @patch
 def genomic_offset(self:GradientForestGO,
         X: np.ndarray, # Environmental matrix (nxP)

@@ -57,7 +57,7 @@ def fit(self:GeometricGO,
 @patch
 def _rescale_env(self:GeometricGO,
         X: np.ndarray, # Environmental matrix (nxP)
-        )-> np.ndarray: # A vector of genomic offsets (n)
+        )-> np.ndarray: # Re-scaled environmental matrix
     if self._mx is None or self._sx  is None: 
         raise ValueError("You have to fit the model first!")
     return (X-self._mx) / self._sx 
