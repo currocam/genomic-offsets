@@ -1,3 +1,5 @@
+*.trees
+*.npz
 _docs/
 _proc/
 .pre-commit-config.yaml
