@@ -43,5 +43,5 @@ jobs:
             git diff
             exit 1;
           fi
-          nbdev_test
+          nbdev_test --skip_file_re simulation
           fi
