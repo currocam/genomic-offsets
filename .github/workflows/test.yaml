@@ -2,6 +2,46 @@ name: CI
 on:  [workflow_dispatch, pull_request, push]
 
 jobs:
-  test:
+ test:
     runs-on: ubuntu-latest
-    steps: [uses: fastai/workflows/nbdev-ci@master]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.10
+      - uses: r-lib/actions/setup-r@v2
+      - name: Test with nbdev + R dependencies
+        shell: bash
+        run: |
+          set -ux
+          python -m pip install --upgrade pip
+          pip install -U nbdev
+          echo "Doing editable install..."
+          test -f setup.py && pip install -e ".[dev]"
+          echo "Intall R dependencies ..."
+          Rscript -e 'pak::pak(c("gradientForest", "LEA"))'
+          echo "Check we are starting with clean git checkout"
+          if [[ `git status --porcelain -uno` ]]; then
+            git diff
+            echo "git status is not clean"
+            false
+          fi
+          echo "Trying to strip out notebooks"
+          nbdev_clean
+          echo "Check that strip out was unnecessary"
+          git status -s # display the status to see which nbs need cleaning up
+          if [[ `git status --porcelain -uno` ]]; then
+            git status -uno
+            echo -e "!!! Detected unstripped out notebooks\n!!!Remember to run nbdev_install_hooks"
+            echo -e "This error can also happen if you are using an older version of nbdev relative to what is in CI.  Please try to upgrade nbdev with the command `pip install -U nbdev`"
+            false
+          fi
+          nbdev_export
+          if [[ `git status --porcelain -uno` ]]; then
+            echo "::error::Notebooks and library are not in sync.  Please run nbdev_export."
+            git status -uno
+            git diff
+            exit 1;
+          fi
+          nbdev_test
+          fi
