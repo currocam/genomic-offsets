@@ -18,7 +18,8 @@ jobs:
           test -f setup.py && pip install -e ".[dev]"
           echo "Intall R dependencies ..."
           Rscript -e 'install.packages("pak", repos = sprintf("https://r-lib.github.io/p/pak/devel/%s/%s/%s",.Platform$pkgType, R.Version()$os, R.Version()$arch))'
-          Rscript -e 'pak::pak(c("r-forge/gradientforest/pkg/gradientForest", "LEA"))'
+          Rscript -e 'install.packages("gradientForest", repos="http://R-Forge.R-project.org")'
+          Rscript -e 'pak::pak("LEA")'
           echo "Check we are starting with clean git checkout"
           if [[ `git status --porcelain -uno` ]]; then
             git diff
