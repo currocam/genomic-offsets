@@ -1,10 +1,16 @@
 """Geometric genomic offset"""
+
 import numpy as np
 from numba import njit
 from .RidgeLFMM import RidgeLFMM
 
+
 @njit
-def genetic_gap(covariance: np.ndarray, environmental_factors: np.ndarray, target_environmental_factors: np.ndarray) -> np.ndarray:
+def genetic_gap(
+    covariance: np.ndarray,
+    environmental_factors: np.ndarray,
+    target_environmental_factors: np.ndarray,
+) -> np.ndarray:
     offsets = np.zeros(environmental_factors.shape[0])
     for i in range(len(offsets)):
         diff = environmental_factors[i, :] - target_environmental_factors[i, :]
@@ -14,22 +20,27 @@ def genetic_gap(covariance: np.ndarray, environmental_factors: np.ndarray, targe
 
 class GeometricGO:
     """Geometric genomic offset statistic."""
-    def __init__(self,
-                 n_latent_factors: int,  # Number of latent factors
-                 lambda_: float): # Regularization parameter
+
+    def __init__(
+        self, n_latent_factors: int, lambda_: float  # Number of latent factors
+    ):  # Regularization parameter
         self.K = n_latent_factors
         self.lambda_ = lambda_
         self._LFMM = None
         self._mx = None
         self._sx = None
         self.Cb = None
+
     def __str__(self):
         return f"Geometric genomic offset with K={self.K} and lambda={self.lambda_}"
+
     __repr__ = __str__
 
-    def fit(self,
-            genotypes: np.ndarray,  # Genotype matrix (nxL)
-            environmental_factors: np.ndarray): # Environmental matrix (nxP)
+    def fit(
+        self,
+        genotypes: np.ndarray,  # Genotype matrix (nxL)
+        environmental_factors: np.ndarray,
+    ):  # Environmental matrix (nxP)
         """
         Fits the Geometric genomic offset model.
         :param genotypes: 2D array of genotypes (nxL).
@@ -51,17 +62,18 @@ class GeometricGO:
         model = self._LFMM = RidgeLFMM(n_latent_factors=self.K, lambda_=self.lambda_)
         model.fit(genotypes=genotypes, environmental_factors=environmental_factors)
         self.Cb = np.dot(model.B.T, model.B) / model.B.shape[0]
-    def _rescale_env(self,
-                     environmental_factors: np.ndarray,  # Environmental matrix (nxP)
-                     )-> np.ndarray: # Re-scaled environmental matrix
-        if self._mx is None or self._sx  is None:
+
+    def _rescale_env(
+        self,
+        environmental_factors: np.ndarray,  # Environmental matrix (nxP)
+    ) -> np.ndarray:  # Re-scaled environmental matrix
+        if self._mx is None or self._sx is None:
             raise ValueError("You have to fit the model first!")
         return (environmental_factors - self._mx) / self._sx
 
-
-    def predict(self,
-                environmental_factors: np.ndarray  # Environmental matrix (nxP)
-                )-> np.ndarray: # Predicted allele frequencies
+    def predict(
+        self, environmental_factors: np.ndarray  # Environmental matrix (nxP)
+    ) -> np.ndarray:  # Predicted allele frequencies
         """
         Predicts the *centered* optimal genotypes for the fitted environmental matrix.
         :param environmental_factors: 2D array of environmental factors (nxP)
@@ -70,10 +82,11 @@ class GeometricGO:
         environmental_factors = self._rescale_env(environmental_factors)
         return self._LFMM.predict(environmental_factors)
 
-    def genomic_offset(self,
-                       environmental_factors: np.ndarray,  # Environmental matrix (nxP)
-                       target_environmental_factors: np.ndarray,  # Altered environmental matrix (nxP)
-                       )-> np.ndarray: # A vector of genomic offsets (n)
+    def genomic_offset(
+        self,
+        environmental_factors: np.ndarray,  # Environmental matrix (nxP)
+        target_environmental_factors: np.ndarray,  # Altered environmental matrix (nxP)
+    ) -> np.ndarray:  # A vector of genomic offsets (n)
         """
         Calculates the geometric genomic offset statistic.
         :param environmental_factors: 2D array of environmental factors (nxP)
@@ -82,4 +95,8 @@ class GeometricGO:
         """
         if environmental_factors.shape != target_environmental_factors.shape:
             raise ValueError("Dimensions of array don't match")
-        return genetic_gap(self.Cb, self._rescale_env(environmental_factors), self._rescale_env(target_environmental_factors))
+        return genetic_gap(
+            self.Cb,
+            self._rescale_env(environmental_factors),
+            self._rescale_env(target_environmental_factors),
+        )

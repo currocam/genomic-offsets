@@ -8,14 +8,27 @@ from rpy2.robjects import default_converter
 def test_tracy_widom_statistics():
     # Suite cases against the AssocTest R package
     test_cases = [
-        (np.array([5, 3, 1, 0]), np.array([-0.8242730, -0.6018554, -0.5552457, np.nan])),
-        (np.array([35, 12, 10, 1]), np.array([-0.507243, -1.350166, -0.632759, np.nan])),
-        (np.array([35, 12, 10, 1, 0]), np.array([-0.4632767, -1.2003935, -0.4407791, -0.5552457, np.nan])),
-        (np.array([12, 35, 10, 1, 0]), np.array([-0.4632767, -1.2003935, -0.4407791, -0.5552457, np.nan]))
+        (
+            np.array([5, 3, 1, 0]),
+            np.array([-0.8242730, -0.6018554, -0.5552457, np.nan]),
+        ),
+        (
+            np.array([35, 12, 10, 1]),
+            np.array([-0.507243, -1.350166, -0.632759, np.nan]),
+        ),
+        (
+            np.array([35, 12, 10, 1, 0]),
+            np.array([-0.4632767, -1.2003935, -0.4407791, -0.5552457, np.nan]),
+        ),
+        (
+            np.array([12, 35, 10, 1, 0]),
+            np.array([-0.4632767, -1.2003935, -0.4407791, -0.5552457, np.nan]),
+        ),
     ]
 
     for eigenvalues, expected in test_cases:
         assert np.nansum(np.abs(tracy_widom_statistics(eigenvalues) - expected)) < 1e-5
+
 
 def generative_model(rng, N, L, P, n_targets):
     x = rng.normal(size=N)
@@ -24,9 +37,13 @@ def generative_model(rng, N, L, P, n_targets):
     b[target_indices] = rng.uniform(-10, 10, size=n_targets)
     u = np.dot(x.reshape(-1, 1), np.array([[-1, 0.5, 1.5]])) + rng.normal(size=(N, 3))
     v = rng.normal(size=(3, L))  # v should have 3 rows to match the columns of u
-    y = np.dot(x.reshape(-1, 1), b.reshape(1, -1)) + np.dot(u, v) + rng.normal(scale=0.5, size=(N, L))
+    y = (
+        np.dot(x.reshape(-1, 1), b.reshape(1, -1))
+        + np.dot(u, v)
+        + rng.normal(scale=0.5, size=(N, L))
+    )
     y = (y > 0).astype(int)
-    x = np.hstack((x.reshape(-1, 1),  rng.normal(size=(N, P-1))))
+    x = np.hstack((x.reshape(-1, 1), rng.normal(size=(N, P - 1))))
     assert x.shape == (N, P)
     assert y.shape == (N, L)
     return y, x
@@ -34,7 +51,7 @@ def generative_model(rng, N, L, P, n_targets):
 
 def test_lfmm():
     try:
-        LEA = importr('LEA')
+        LEA = importr("LEA")
     except ImportError:
         # Install
         # Skip if not installed
@@ -61,7 +78,7 @@ def test_lfmm():
         # Generate random regularization parameters when fixed version of LEA
         # is available
         # See https://github.com/bcm-uga/LEA/commit/a37ac6c3b25b3d1b0ca0fa7517dcfaaf340fa631
-        #lambdas = rng.uniform(low=1e-6, high=1e3, size=5)
+        # lambdas = rng.uniform(low=1e-6, high=1e3, size=5)
         lambdas = np.repeat(1e-10, 5)
         for K, lambda_ in zip(Ks, lambdas):
             modelsim = RidgeLFMM(K, lambda_)
