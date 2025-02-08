@@ -1,0 +1,7 @@
+.pixi
+*.egg-info
+.idea
+
+# pixi environments
+.pixi
+*.egg-info
