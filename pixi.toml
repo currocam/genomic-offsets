@@ -8,7 +8,6 @@ preview = ["pixi-build"]
 
 [dependencies]
 genomic_offsets = { path = "." }
-pixi-pycharm = ">=0.0.8,<0.0.9"
 
 [package]
 name = "genomic_offsets"
