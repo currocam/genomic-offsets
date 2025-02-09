@@ -11,7 +11,7 @@ genomic_offsets = { path = "." }
 
 [package]
 name = "genomic_offsets"
-version = "0.1.0"
+version = "0.1.1"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "0.1.*" }

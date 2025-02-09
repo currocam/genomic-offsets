@@ -21,9 +21,12 @@ def genetic_gap(
 class GeometricGO:
     """Geometric genomic offset statistic."""
 
-    def __init__(
-        self, n_latent_factors: int, lambda_: float  # Number of latent factors
-    ):  # Regularization parameter
+    def __init__(self, n_latent_factors: int, lambda_: float = 1e-5):
+        """
+        Initializes the Geometric genomic offset model.
+        :param n_latent_factors: Number of latent factors.
+        :param lambda_: Regularization parameter. Default is 1e-5.
+        """
         self.K = n_latent_factors
         self.lambda_ = lambda_
         self._LFMM = None

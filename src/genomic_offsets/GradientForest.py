@@ -7,6 +7,7 @@ from rpy2.robjects.packages import PackageNotInstalledError
 from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 from numba import njit
+from numba.typed import List
 
 
 @njit
@@ -37,6 +38,10 @@ class GradientForestGO:
         self,
         n_trees: int,  # Number of  trees
     ):
+        """
+        Initializes the Gradient forest genomic offset model. It requires the gradientForest R package.
+        :param n_trees: Number of trees.
+        """
         self.n_trees = n_trees
         self._gf = None
         self.F = []
@@ -46,10 +51,9 @@ class GradientForestGO:
             # Try loading the gradientForest package
             self._gradient_forest = importr("gradientForest")
         except PackageNotInstalledError:
-            print("gradientForest package is not installed. You can install it using:")
-            print(
-                'install.packages("gradientForest", repos="https://R-Forge.R-project.org")'
-            )
+            msg = "gradientForest package is not installed. You can install it using:\n"
+            msg += 'install.packages("gradientForest", repos="https://R-Forge.R-project.org")'
+            raise PackageNotInstalledError(msg)
         except Exception as e:
             print(f"An error occurred: {e}")
 
@@ -91,7 +95,7 @@ class GradientForestGO:
                 response_vars=cols[environmental_factors.shape[1] :],
                 ntree=self.n_trees,
             )
-            self.F = []
+            self.F = List()
             for col in predictor_vars:
                 dist = self._gradient_forest.cumimp_gradientForest(self._gf, col)
                 dist = (np.array(dist[0]), np.array(dist[1]))

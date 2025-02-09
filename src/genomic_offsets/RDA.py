@@ -8,6 +8,10 @@ class RDA:
     """Redundancy analysis genomic offset statistic."""
 
     def __init__(self, n_latent_factors: int):
+        """
+        Initializes the RDA genomic offset model.
+        :param n_latent_factors: Number of latent factors.
+        """
         self._reg = None
         self._pca = None
         self.n_latent_factors = n_latent_factors
@@ -47,7 +51,7 @@ class RDA:
         """
         Predicts the projected alleles for a given environmental matrix.
         :param environmental_factors: 2D array with environmental factors.
-        :return: 2D array with predicted allele frequencies.
+        :return: 2D array with projected allele frequencies.
         """
         environmental_factors = sm.add_constant(environmental_factors)
         return np.dot(self._reg.predict(environmental_factors), self._pca.loadings)
@@ -80,6 +84,10 @@ class PartialRDA:
     """Partial redundancy analysis genomic offset statistic."""
 
     def __init__(self, n_latent_factors: int):
+        """
+        Initializes the partial RDA genomic offset model.
+        :param n_latent_factors: Number of latent factors.
+        """
         self._mod = None
         self._reg_X = None
         self._reg_residuals = None
